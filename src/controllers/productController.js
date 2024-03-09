@@ -1,12 +1,25 @@
 const product = require('../models/product');
-const {getProducts,showProductById, updateProduct, showNewProduct, deleteProduct} = require('../utils/functions');
+const {getProducts,showProductById, updateProduct, showNewProduct, showEditProduct, deleteProduct, home} = require('../utils/functions');
 
 
 const productController = {
+     homeControl(req, res) {
+        try {
+            const showHome = home ()
+            res.send(showHome)
+            
+        } catch (error) {
+            console.log(error);
+            res.status(400).send("No se pudo cargar la página.");
+            
+        }
+
+    },
     async create (req, res) {
         try {
             const productP = await product.create(req.body);
             res.status(201).redirect(`/dashboard/${productP._id}`);
+            productP.save()
         } catch (error) {
             console.log(error);
             res.status(400).send("Error al crear el producto.");
@@ -39,7 +52,7 @@ const productController = {
             const _id = req.params.productId;
             const newInfo = req.body;
             const updatedProduct = await updateProduct(_id, newInfo);
-            res.status(200).redirect(`/dashboard/${_id}`);
+            res.status(200).redirect(`/dashboard/${updatedProduct._id}`);
         } catch (error) {
             console.log(error);
             res.status(400).send("No se pudo actualizar el producto.");
@@ -54,6 +67,17 @@ const productController = {
             res.status(400).send("No se pudo cargar la página.");
         }
     },
+    async showEditForm (req, res) {
+        try {
+            const _id = req.params.productId;
+            const EditProduct = await showEditProduct(_id);
+            res.send(EditProduct);
+        } catch (error) {
+            console.log(error);
+            res.status(400).send("No se pudo cargar la página.");
+            
+        }
+    },
     async productDelete (req, res) {
         try {
             const _id = req.params.productId
@@ -65,5 +89,6 @@ const productController = {
         }
     }
 }
+
 
 module.exports = productController

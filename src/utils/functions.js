@@ -1,5 +1,29 @@
 const product = require("../models/product");
 
+function home () {
+    const html =`
+    <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Products</title>
+        </head>
+        <body>
+            <header>
+                <nav>
+                    <a href='/'>Home</a>
+                    <a href='/dashboard'>Dashboard</a>
+                    <a href='/products'>Productos</a>
+                    <a href='/dashboard/new'>Nuevo Producto</a>
+                </nav>
+            </header>
+        </body>
+    </html>`
+
+    return html;
+}
+
 async function getProducts() {
     const productList = await product.find();
     const dashboardPage = 'http://localhost:3000/dashboard/';
@@ -55,8 +79,9 @@ async function getProducts() {
 
 async function showProductById(_id) {
     const getProduct = await product.findById(_id);
-
-    const delButton = `<button id="delButton">Borrar producto</button>`;
+    
+    const editButton = `<button id="editButton" onclick="redirect()">Actualizar producto</button>`
+    const delButton = `<button id="delButton" onclick="sendDelete()">Borrar producto</button>`;
     const showProduct = `
     <p>Nombre:${getProduct.nombre}
     </p> <p>Descripción:${getProduct.descripcion}</p> 
@@ -83,23 +108,26 @@ async function showProductById(_id) {
         </header>
         <main>
           <div>${showProduct}</div>
-          <div>${delButton}</div>
+          <div>${editButton}</div><div>${delButton}</div>
         </main>
         <script>
             const currentUrl = window.location.href;
             const delButtonElement = document.getElementById('delButton');
-            function sendDelete(p) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("DELETE",p);
-                xhr.send('/dashboard');
-              }
-           
+            const editButtonElement = document.getElementById('editButton');
 
             if (currentUrl.includes('/dashboard')) {
                 delButtonElement.style.display = 'block';
-                delButtonElement.addEventListener('click', sendDelete(window.location.href + '/delete'))
+                editButtonElement.style.display = 'block';
+                function sendDelete() {
+                    fetch(window.location.href + '/delete', {method: 'DELETE'})
+                    window.location.href = 'http://localhost:3000/dashboard/'
+                }
+                function redirect() {
+                    window.location.href = '/dashboard/${getProduct._id}/edit'
+                }
             } else {
                 delButtonElement.style.display = 'none';
+                editButtonElement.style.display = 'none';
             }
         </script>
     </body>
@@ -110,7 +138,8 @@ async function showProductById(_id) {
 };
 
 async function updateProduct (_id, newInfo) {
-    const productUpdate = await product.findByIdAndUpdate(_id, newInfo)
+    const productUpdate = await product.findByIdAndUpdate(_id, newInfo, {new:true});
+    return productUpdate
 };
 
 async function showNewProduct () {
@@ -158,9 +187,55 @@ async function showNewProduct () {
     return html;
 };
 
-async function deleteProduct (_id){
+async function showEditProduct (_id) {
+    const html = `<!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Products - Dashboard</title>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <a href='/'>Home</a>
+                <a href='/dashboard'>Dashboard</a>
+                <a href='/products'>Productos</a>
+                <a href='/dashboard/new'>Nuevo Producto</a>
+            </nav>
+        </header>
+        <main>
+            <form action="/dashboard/${_id}" method="put">
+                <label>Nombre: <input type="text" name="nombre" id="nombre"/></label><br>
+                <label>Descripción: <input type="text" name="descripcion" id="descripcion" /></label><br>
+                <label>Imagen: <input type="text" name="imagen" id="imagen" /></label><br>
+                <label>Categoria: <select name="categoria" id="categoria" >
+                    <option value="Camisetas">Camisetas</option>
+                    <option value="Pantalones">Pantalones</option>
+                    <option value="Zapatos">Zapatos</option>
+                    <option value="Accesorios">Accesorios</option>
+                </select></label><br>
+                <label>Talla: <select name="talla" id="talla" >
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                </select></label><br>
+                <label>Precio: <input type="number" name="precio" id="precio" /></label><br>
+                <input type="submit" value="Actualizar" />
+                <input type="reset" value="Reestablecer todo" />
+            </form>
+        </main>
+    </body>
+    </html>`;
+
+    return html;
+
+};
+
+async function deleteProduct (_id) {
     const deletingProduct = await product.findByIdAndDelete(_id)
     
 };
 
-module.exports = {getProducts, showProductById, updateProduct, showNewProduct, deleteProduct}
+module.exports = {home, getProducts, showProductById, updateProduct, showNewProduct, showEditProduct, deleteProduct}
