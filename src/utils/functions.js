@@ -30,11 +30,11 @@ async function getProducts() {
     const productsPage = 'http://localhost:3000/products/';
 
     const productListHTML = productList.map(product => `
-    <a href='#' onclick="redirect('${dashboardPage}${product._id}', '${productsPage}${product._id}')">
+    <a href='#' onclick="redirect('${dashboardPage}${product._id}', '${productsPage}${product._id}')" style= text-decoration:none >
         <li>
             <p>Nombre: ${product.nombre}</p>
-            <img src='${product.imagen}'>
-            <p>Precio: ${product.precio}</p>
+            <img src='${product.imagen}' height='200px'>
+            <p>Precio: ${product.precio} €</p>
         </li>
     </a>`).join('');
 
@@ -83,12 +83,12 @@ async function showProductById(_id) {
     const editButton = `<button id="editButton" onclick="redirect()">Actualizar producto</button>`
     const delButton = `<button id="delButton" onclick="sendDelete()">Borrar producto</button>`;
     const showProduct = `
-    <p>Nombre:${getProduct.nombre}
-    </p> <p>Descripción:${getProduct.descripcion}</p> 
-    <img src='${getProduct.imagen}'> 
-    <p>Categoria:${getProduct.categoria}</p> 
+    <p>Nombre: ${getProduct.nombre}
+    </p> <p>Descripción: ${getProduct.descripcion}</p> 
+    <img src='${getProduct.imagen}' height='200px'> 
+    <p>Categoria: ${getProduct.categoria}</p> 
     <p>Talla: ${getProduct.talla}</p> 
-    <p>Precio:${getProduct.precio}</p>`;
+    <p>Precio: ${getProduct.precio} € </p>`;
 
     const html = `<!DOCTYPE html>
     <html lang="es">
